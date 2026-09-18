@@ -1,0 +1,45 @@
+{% load static %}
+<div class="card">
+  <div class="card-media">
+    <div class="card-badges">
+      {% if laptop.discount_percent %}<span class="tag tag-sale">-{{ laptop.discount_percent }}%</span>{% endif %}
+      {% if not laptop.in_stock %}<span class="tag tag-out">Out of stock</span>{% endif %}
+    </div>
+    {% if user.is_authenticated %}
+    <form action="{% url 'store:wishlist_toggle' laptop.id %}" method="post">
+      {% csrf_token %}
+      <button type="submit" class="card-wish" title="Toggle wishlist">♡</button>
+    </form>
+    {% endif %}
+    <a href="{{ laptop.get_absolute_url }}">
+      {% if laptop.image %}<img src="{{ laptop.image.url }}" alt="{{ laptop.name }}">
+      {% else %}<img src="{% static 'img/laptop-placeholder.svg' %}" alt="{{ laptop.name }} placeholder" class="fallback-image">{% endif %}
+    </a>
+  </div>
+  <div class="card-body">
+    <span class="card-brand">{{ laptop.brand.name }}</span>
+    <h3 class="card-title"><a href="{{ laptop.get_absolute_url }}">{{ laptop.name }}</a></h3>
+    <div class="spec-strip">
+      <span class="chip">{{ laptop.ram_gb }}GB RAM</span>
+      <span class="chip">{{ laptop.storage_gb }}GB {{ laptop.storage_type }}</span>
+      <span class="chip">{{ laptop.gpu|truncatechars:16 }}</span>
+    </div>
+    {% if laptop.review_count %}
+    <div class="card-rating"><span class="stars">★</span> {{ laptop.average_rating }} <span>({{ laptop.review_count }})</span></div>
+    {% endif %}
+    <div class="card-price-row">
+      <span class="price">${{ laptop.current_price }}</span>
+      {% if laptop.discount_price %}<span class="price-old">${{ laptop.price }}</span>{% endif %}
+    </div>
+  </div>
+  <div class="card-actions">
+    <form action="{% url 'store:cart_add' laptop.id %}" method="post" style="display:contents">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary btn-sm" {% if not laptop.in_stock %}disabled{% endif %}>Add to cart</button>
+    </form>
+    <form action="{% url 'store:compare_toggle' laptop.id %}" method="post" style="display:contents">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-ghost btn-sm">⇄ Compare</button>
+    </form>
+  </div>
+</div>

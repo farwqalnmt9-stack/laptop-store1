@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Your cart — NOTEBIT{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1 style="padding-top:36px">Your cart</h1>
+
+  {% if cart|length == 0 %}
+  <div class="empty-state">
+    <span class="glyph">▤</span>
+    <p>Your cart is empty.</p>
+    <a href="{% url 'store:product_list' %}" class="btn btn-primary" style="margin-top:14px">Browse laptops</a>
+  </div>
+  {% else %}
+  <div class="cart-layout">
+    <div>
+      {% for item in cart %}
+      <div class="cart-row">
+        {% if item.laptop.image %}<img src="{{ item.laptop.image.url }}" alt="{{ item.laptop.name }}">{% else %}<img src="{% static 'img/laptop-placeholder.svg' %}" alt="{{ item.laptop.name }} placeholder" class="fallback-image">{% endif %}
+        <div>
+          <div class="name">{{ item.laptop.name }}</div>
+          <div class="meta">{{ item.laptop.brand.name }} · {{ item.laptop.ram_gb }}GB / {{ item.laptop.storage_gb }}GB</div>
+        </div>
+        <form action="{% url 'store:cart_update' item.laptop.id %}" method="post" style="display:flex;align-items:center">
+          {% csrf_token %}
+          <input type="number" name="quantity" value="{{ item.quantity }}" min="0" max="{{ item.laptop.stock }}" class="qty-input" onchange="this.form.submit()">
+        </form>
+        <span class="price">${{ item.subtotal }}</span>
+        <form action="{% url 'store:cart_remove' item.laptop.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="cart-summary">
+      <h4 style="font-family:var(--font-mono);font-size:12px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Order summary</h4>
+      <div class="summary-row"><span>Items</span><span>{{ cart|length }}</span></div>
+      <div class="summary-row"><span>Shipping</span><span>{% if cart.total >= 500 %}Free{% else %}$15{% endif %}</span></div>
+      <div class="summary-row total"><span>Total</span><span>${{ cart.total }}</span></div>
+      <a href="{% url 'store:checkout' %}" class="btn btn-primary btn-block" style="margin-top:16px">Checkout</a>
+      <a href="{% url 'store:product_list' %}" class="btn btn-ghost btn-block" style="margin-top:10px">Keep browsing</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Shop laptops — NOTEBIT{% endblock %}
+{% block content %}
+<div class="wrap shop-layout">
+
+  <aside class="filters">
+    <form method="get">
+      {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+
+      <div class="filter-group">
+        <h4>Brand</h4>
+        {% for b in brands %}
+        <label class="filter-option">
+          <input type="checkbox" name="brand" value="{{ b.slug }}" {% if b.slug in selected_brands %}checked{% endif %} onchange="this.form.submit()">
+          {{ b.name }}
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="filter-group">
+        <h4>Category</h4>
+        <label class="filter-option">
+          <input type="radio" name="category" value="" {% if not selected_category %}checked{% endif %} onchange="this.form.submit()"> All
+        </label>
+        {% for c in categories %}
+        <label class="filter-option">
+          <input type="radio" name="category" value="{{ c.slug }}" {% if selected_category == c.slug %}checked{% endif %} onchange="this.form.submit()">
+          {{ c.name }}
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="filter-group">
+        <h4>Price range</h4>
+        <div class="price-range">
+          <input type="number" name="min_price" placeholder="Min" value="{{ request.GET.min_price }}">
+          <span>–</span>
+          <input type="number" name="max_price" placeholder="Max" value="{{ request.GET.max_price }}">
+        </div>
+        <button type="submit" class="btn btn-ghost btn-sm btn-block" style="margin-top:10px">Apply</button>
+      </div>
+
+      <div class="filter-group">
+        <h4>Minimum RAM</h4>
+        <select name="min_ram" class="sort-select" style="width:100%" onchange="this.form.submit()">
+          <option value="">Any</option>
+          <option value="8" {% if request.GET.min_ram == '8' %}selected{% endif %}>8 GB+</option>
+          <option value="16" {% if request.GET.min_ram == '16' %}selected{% endif %}>16 GB+</option>
+          <option value="32" {% if request.GET.min_ram == '32' %}selected{% endif %}>32 GB+</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <h4>Storage type</h4>
+        <label class="filter-option"><input type="radio" name="storage_type" value="" {% if not request.GET.storage_type %}checked{% endif %} onchange="this.form.submit()"> Any</label>
+        <label class="filter-option"><input type="radio" name="storage_type" value="SSD" {% if request.GET.storage_type == 'SSD' %}checked{% endif %} onchange="this.form.submit()"> SSD only</label>
+        <label class="filter-option"><input type="radio" name="storage_type" value="HYBRID" {% if request.GET.storage_type == 'HYBRID' %}checked{% endif %} onchange="this.form.submit()"> SSD + HDD</label>
+      </div>
+
+      <div class="filter-group" style="border-bottom:0">
+        <label class="filter-option"><input type="checkbox" name="in_stock" value="1" {% if request.GET.in_stock %}checked{% endif %} onchange="this.form.submit()"> In stock only</label>
+      </div>
+
+      <a href="{% url 'store:product_list' %}" class="btn btn-ghost btn-sm btn-block">Clear filters</a>
+    </form>
+  </aside>
+
+  <div>
+    <div class="shop-toolbar">
+      <span class="result-count">{{ result_count }} laptop{{ result_count|pluralize }} found{% if query %} for "{{ query }}"{% endif %}</span>
+      <form method="get">
+        {% for b in selected_brands %}<input type="hidden" name="brand" value="{{ b }}">{% endfor %}
+        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+        {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+        <select name="sort" class="sort-select" onchange="this.form.submit()">
+          <option value="newest" {% if sort == 'newest' or sort == '-created_at' %}selected{% endif %}>Newest</option>
+          <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: low to high</option>
+          <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: high to low</option>
+          <option value="name" {% if sort == 'name' %}selected{% endif %}>Name A–Z</option>
+        </select>
+      </form>
+    </div>
+
+    {% if laptops %}
+    <div class="product-grid">
+      {% for laptop in laptops %}{% include 'store/_product_card.html' %}{% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <span class="glyph">▣</span>
+      <p>No laptops match those filters. Try widening your range or clearing filters.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

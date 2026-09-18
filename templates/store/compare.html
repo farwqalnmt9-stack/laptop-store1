@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Compare — NOTEBIT{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="section-head" style="padding-top:36px">
+    <div><span class="eyebrow">Side by side</span><h1>Compare laptops</h1></div>
+    {% if laptops %}<a href="{% url 'store:compare_clear' %}" class="btn btn-ghost btn-sm">Clear all</a>{% endif %}
+  </div>
+
+  {% if laptops %}
+  <div style="overflow-x:auto">
+  <table class="compare-table">
+    <tr>
+      <th></th>
+      {% for laptop in laptops %}
+      <th class="compare-head-card">
+        {% if laptop.image %}<img src="{{ laptop.image.url }}" alt="{{ laptop.name }}">{% else %}<img src="{% static 'img/laptop-placeholder.svg' %}" alt="{{ laptop.name }} placeholder" class="fallback-image">{% endif %}
+        <div>{{ laptop.name }}</div>
+        <form action="{% url 'store:compare_toggle' laptop.id %}" method="post" style="margin-top:8px">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+        </form>
+      </th>
+      {% endfor %}
+    </tr>
+    {% for label, values in table %}
+    <tr>
+      <td>{{ label }}</td>
+      {% for v in values %}<td>{{ v }}</td>{% endfor %}
+    </tr>
+    {% endfor %}
+    <tr>
+      <td></td>
+      {% for laptop in laptops %}
+      <td>
+        <form action="{% url 'store:cart_add' laptop.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm">Add to cart</button>
+        </form>
+      </td>
+      {% endfor %}
+    </tr>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="glyph">⇄</span>
+    <p>No laptops selected yet. Tap "⇄ Compare" on any product to add it here (up to 3).</p>
+    <a href="{% url 'store:product_list' %}" class="btn btn-primary" style="margin-top:14px">Browse laptops</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

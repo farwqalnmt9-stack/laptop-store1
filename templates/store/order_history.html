@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Your orders — NOTEBIT{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1 style="padding-top:36px;margin-bottom:24px">Your orders</h1>
+  {% if orders %}
+  <table class="compare-table" style="margin-bottom:40px">
+    <tr><th>Order</th><th>Date</th><th>Status</th><th>Items</th><th>Total</th></tr>
+    {% for order in orders %}
+    <tr>
+      <td class="mono">#{{ order.id }}</td>
+      <td>{{ order.created_at|date:"M d, Y" }}</td>
+      <td>{{ order.get_status_display }}</td>
+      <td>{{ order.items.count }} item{{ order.items.count|pluralize }}</td>
+      <td class="mono">${{ order.total }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty-state"><span class="glyph">◇</span><p>No orders yet.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

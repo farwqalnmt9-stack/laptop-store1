@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block title %}{% trans "Product dashboard" %} — NOTEBIT{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">{% endblock %}
+{% block content %}
+<section class="dashboard shell">
+  <div class="dashboard__heading" data-reveal>
+    <div><p class="kicker">{% trans "Store control room" %}</p><h1>{% trans "Product dashboard" %}</h1><p>{% trans "Add, update, and remove products without leaving your store." %}</p></div>
+    <a class="btn btn-primary" href="{% url 'store:dashboard_product_add' %}"><span aria-hidden="true">+</span>{% trans "Add product" %}</a>
+  </div>
+
+  <div class="dashboard-stats" data-reveal>
+    <article><span>{% trans "All products" %}</span><strong>{{ total_products }}</strong></article>
+    <article><span>{% trans "Live now" %}</span><strong>{{ active_products }}</strong></article>
+    <article><span>{% trans "Low stock" %}</span><strong>{{ low_stock_count }}</strong></article>
+    <article><span>{% trans "Out of stock" %}</span><strong>{{ out_of_stock_count }}</strong></article>
+  </div>
+
+  <section class="dashboard-list" aria-labelledby="inventory-title">
+    <div class="dashboard-list__head"><div><p class="kicker">{% trans "Inventory" %}</p><h2 id="inventory-title">{% trans "Your product catalogue" %}</h2></div><span>{{ total_products }} {% trans "products" %}</span></div>
+    <div class="dashboard-list__scroll"><table>
+      <thead><tr><th>{% trans "Product" %}</th><th>{% trans "Category" %}</th><th>{% trans "Price" %}</th><th>{% trans "Stock" %}</th><th>{% trans "Status" %}</th><th><span class="sr-only">{% trans "Actions" %}</span></th></tr></thead>
+      <tbody>{% for laptop in products %}<tr>
+        <td><div class="dashboard-product">{% if laptop.image %}<img src="{{ laptop.image.url }}" alt="">{% else %}<img src="{% static 'img/laptop-placeholder.svg' %}" alt="">{% endif %}<span><small>{{ laptop.brand.name }}</small><b>{{ laptop.name }}</b><em>{{ laptop.sku }}</em></span></div></td>
+        <td>{{ laptop.category.name|default:"—" }}</td><td>${{ laptop.current_price }}</td><td><span class="stock {% if laptop.stock == 0 %}stock--out{% elif laptop.stock <= 3 %}stock--low{% endif %}">{{ laptop.stock }}</span></td>
+        <td><span class="status {% if laptop.is_active %}status--live{% endif %}">{% if laptop.is_active %}{% trans "Live" %}{% else %}{% trans "Hidden" %}{% endif %}</span></td>
+        <td><div class="dashboard-actions"><a href="{% url 'store:dashboard_product_edit' laptop.id %}" class="btn btn-ghost btn-sm">{% trans "Edit" %}</a><form method="post" action="{% url 'store:dashboard_product_delete' laptop.id %}" onsubmit="return confirm('{% trans "Delete this product permanently?" %}')">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Delete" %}</button></form></div></td>
+      </tr>{% empty %}<tr><td colspan="6"><div class="dashboard-empty"><p>{% trans "Your catalogue is ready for its first product." %}</p><a class="btn btn-primary" href="{% url 'store:dashboard_product_add' %}">{% trans "Add your first product" %}</a></div></td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+</section>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ laptop.name }} — NOTEBIT{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="pd-layout">
+    <div>
+      <div class="pd-gallery-main">
+        {% if laptop.image %}<img src="{{ laptop.image.url }}" alt="{{ laptop.name }}">
+        {% else %}<img src="{% static 'img/laptop-placeholder.svg' %}" alt="{{ laptop.name }} placeholder" class="fallback-image">{% endif %}
+      </div>
+      <div class="pd-thumbs">
+        {% if laptop.image %}<img src="{{ laptop.image.url }}" alt="">{% endif %}
+        {% if laptop.image_2 %}<img src="{{ laptop.image_2.url }}" alt="">{% endif %}
+        {% if laptop.image_3 %}<img src="{{ laptop.image_3.url }}" alt="">{% endif %}
+      </div>
+    </div>
+
+    <div>
+      <span class="pd-brand">{{ laptop.brand.name }} {% if laptop.category %}· {{ laptop.category.name }}{% endif %}</span>
+      <h1 class="pd-title">{{ laptop.name }}</h1>
+      <div class="pd-rating">
+        <span class="stars">★★★★★</span>
+        {% if laptop.review_count %}{{ laptop.average_rating }} · {{ laptop.review_count }} review{{ laptop.review_count|pluralize }}
+        {% else %}No reviews yet{% endif %}
+        <span class="mono" style="color:var(--muted)">SKU {{ laptop.sku }}</span>
+      </div>
+
+      <div class="pd-price-block">
+        <span class="pd-price">${{ laptop.current_price }}</span>
+        {% if laptop.discount_price %}
+          <span class="pd-price-old">${{ laptop.price }}</span>
+          <span class="pd-save">Save {{ laptop.discount_percent }}%</span>
+        {% endif %}
+      </div>
+
+      {% if laptop.in_stock %}
+        <p class="stock-line ok">● In stock — {{ laptop.stock }} unit{{ laptop.stock|pluralize }} available</p>
+      {% else %}
+        <p class="stock-line out">● Out of stock</p>
+      {% endif %}
+
+      <div class="pd-actions">
+        <form action="{% url 'store:cart_add' laptop.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-block" {% if not laptop.in_stock %}disabled{% endif %}>Add to cart</button>
+        </form>
+        {% if user.is_authenticated %}
+        <form action="{% url 'store:wishlist_toggle' laptop.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn {% if is_wishlisted %}btn-primary{% else %}btn-ghost{% endif %}">{% if is_wishlisted %}♥ Saved{% else %}♡ Save{% endif %}</button>
+        </form>
+        {% endif %}
+        <form action="{% url 'store:compare_toggle' laptop.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn {% if in_compare %}btn-primary{% else %}btn-ghost{% endif %}">⇄ {% if in_compare %}Added{% else %}Compare{% endif %}</button>
+        </form>
+      </div>
+
+      <table class="spec-table">
+        <tr><td>CPU</td><td>{{ laptop.cpu }} ({{ laptop.cpu_cores }} cores)</td></tr>
+        <tr><td>RAM</td><td>{{ laptop.ram_gb }} GB</td></tr>
+        <tr><td>Storage</td><td>{{ laptop.storage_gb }} GB {{ laptop.get_storage_type_display }}</td></tr>
+        <tr><td>GPU</td><td>{{ laptop.gpu }}</td></tr>
+        <tr><td>Display</td><td>{{ laptop.screen_size }}" · {{ laptop.resolution }} · {{ laptop.refresh_rate }}Hz</td></tr>
+        <tr><td>Battery</td><td>{{ laptop.battery_wh }} Wh</td></tr>
+        <tr><td>Weight</td><td>{{ laptop.weight_kg }} kg</td></tr>
+        <tr><td>OS</td><td>{{ laptop.os }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="pd-tabs">
+    <div class="pd-tab-nav">
+      <a href="#description" class="active">Description</a>
+      <a href="#reviews">Reviews ({{ laptop.review_count }})</a>
+    </div>
+
+    <div id="description" style="max-width:720px;color:var(--muted);line-height:1.7">
+      {{ laptop.description|linebreaks|default:"No description provided yet." }}
+    </div>
+
+    <div id="reviews" style="max-width:720px;margin-top:40px">
+      {% for review in laptop.reviews.all %}
+      <div class="review">
+        <div class="review-head">
+          <span><span class="stars">{{ review.rating }}★</span> · <b style="color:var(--ink)">{{ review.title }}</b></span>
+          <span>{{ review.user.username }} · {{ review.created_at|date:"M d, Y" }}</span>
+        </div>
+        <p>{{ review.comment }}</p>
+      </div>
+      {% empty %}
+      <p style="color:var(--muted)">No reviews yet — be the first to share your experience.</p>
+      {% endfor %}
+
+      <div class="review-form">
+        <h4 style="margin-bottom:14px">Write a review</h4>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-row">
+            <label>Rating</label>
+            {{ review_form.rating }}
+          </div>
+          <div class="form-row">
+            <label>Title</label>
+            {{ review_form.title }}
+          </div>
+          <div class="form-row">
+            <label>Comment</label>
+            {{ review_form.comment }}
+          </div>
+          <button type="submit" name="submit_review" class="btn btn-primary">Post review</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% if related %}
+  <section class="section">
+    <div class="section-head"><div><span class="eyebrow">You might also like</span><h2>Related laptops</h2></div></div>
+    <div class="product-grid">
+      {% for laptop in related %}{% include 'store/_product_card.html' %}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

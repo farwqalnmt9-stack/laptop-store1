@@ -1,0 +1,32 @@
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#090b10">
+  <title>{% block title %}NOTEBIT — Laptops, Specced Right{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}"><link rel="stylesheet" href="{% static 'css/responsive-fixes.css' %}?v=3">{% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<a class="skip-link" href="#main-content">{% trans "Skip to content" %}</a>
+{% block header %}
+<div class="announcement" role="status"><div class="shell announcement__inner"><span>{% trans "Complimentary delivery on orders over $500" %}</span><span aria-hidden="true">•</span><span>{% trans "30-day returns" %}</span></div></div>
+<header class="site-header">
+  <div class="shell site-header__bar">
+    <a href="{% url 'store:home' %}" class="brand" aria-label="NOTEBIT {% trans 'home' %}"><span class="brand__mark" aria-hidden="true">N</span><span>NOTEBIT</span><i aria-hidden="true"></i></a>
+    <form action="{% url 'store:product_list' %}" method="get" class="site-search" role="search"><label class="sr-only" for="site-search">{% trans "Search laptops" %}</label><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg><input id="site-search" type="search" name="q" placeholder="{% trans 'Search model, CPU, GPU…' %}" value="{{ request.GET.q }}"><button type="submit">{% trans "Search" %}</button></form>
+    <button class="menu-toggle" type="button" aria-label="{% trans 'Open navigation' %}" aria-expanded="false" aria-controls="primary-navigation"><span></span><span></span></button>
+    <nav class="header-actions" id="primary-navigation" aria-label="{% trans 'Primary navigation' %}"><a href="{% url 'store:compare' %}">{% trans "Compare" %}{% if compare_count %}<b class="count-badge">{{ compare_count }}</b>{% endif %}</a>{% if user.is_authenticated %}{% if user.is_staff %}<a class="dashboard-nav-link" href="{% url 'store:dashboard' %}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 3h6m-3-3v6"/></svg>Dashboard</a>{% endif %}<a href="{% url 'store:wishlist' %}">{% trans "Wishlist" %}</a><a href="{% url 'store:order_history' %}">{% trans "Orders" %}</a><a href="{% url 'accounts:logout' %}">{% trans "Sign out" %}</a>{% else %}<a href="{% url 'accounts:login' %}">{% trans "Sign in" %}</a>{% endif %}<a class="cart-link" href="{% url 'store:cart' %}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.95-1.55L20.5 8H6.1M10 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/></svg>{% trans "Cart" %}{% if cart_count %}<b class="count-badge">{{ cart_count }}</b>{% endif %}</a><form action="{% url 'set_language' %}" method="post" class="language-switcher">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button name="language" value="{% if LANGUAGE_CODE == 'ar' %}en{% else %}ar{% endif %}" type="submit" aria-label="{% trans 'Change language' %}">{% if LANGUAGE_CODE == 'ar' %}EN{% else %}ع{% endif %}</button></form></nav>
+  </div>
+  {% if not user.is_staff %}<a class="dashboard-portal-link" href="{% url 'store:dashboard' %}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 3h6m-3-3v6"/></svg>Dashboard</a>{% endif %}
+  <nav class="shell category-nav" aria-label="{% trans 'Shop categories' %}"><a href="{% url 'store:product_list' %}">{% trans "All laptops" %}</a><a href="{% url 'store:product_list' %}?category=gaming">{% trans "Gaming" %}</a><a href="{% url 'store:product_list' %}?category=business">{% trans "Business" %}</a><a href="{% url 'store:product_list' %}?category=student">{% trans "Student" %}</a><a href="{% url 'store:product_list' %}?category=creator">{% trans "Creator" %}</a><a href="{% url 'store:product_list' %}?category=ultrabook">{% trans "Ultrabook" %}</a></nav>
+</header>
+{% endblock %}
+{% if messages %}<div class="shell messages" aria-live="polite">{% for message in messages %}<div class="message message-{{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+<main id="main-content" tabindex="-1">{% block content %}{% endblock %}</main>
+{% block footer %}<footer class="site-footer"><div class="shell footer__grid"><div><a href="{% url 'store:home' %}" class="brand brand--footer"><span class="brand__mark" aria-hidden="true">N</span><span>NOTEBIT</span><i aria-hidden="true"></i></a><p>{% trans "A better way to choose a machine: clear specifications, thoughtful comparison, no guesswork." %}</p></div><div><h2>{% trans "Explore" %}</h2><a href="{% url 'store:product_list' %}">{% trans "All laptops" %}</a><a href="{% url 'store:compare' %}">{% trans "Compare machines" %}</a></div><div><h2>{% trans "Account" %}</h2><a href="{% url 'store:order_history' %}">{% trans "Order history" %}</a><a href="{% url 'accounts:login' %}">{% trans "Sign in" %}</a></div></div><div class="shell footer__bottom">© {% now "Y" %} NOTEBIT <span>{% trans "Built for people who read the spec sheet." %}</span></div></footer>{% endblock %}
+<script src="{% static 'js/motion.js' %}" defer></script>
+</body></html>

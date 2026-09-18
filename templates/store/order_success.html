@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Order confirmed — NOTEBIT{% endblock %}
+{% block content %}
+<div class="wrap pagelet">
+  <div class="auth-card" style="text-align:center">
+    <h1>✓ Order #{{ order.id }} confirmed</h1>
+    <p style="color:var(--muted);margin-bottom:24px">We'll reach out at {{ order.phone }} to confirm delivery to {{ order.address }}, {{ order.city }}.</p>
+    <table class="spec-table" style="text-align:left;margin-bottom:24px">
+      {% for item in order.items.all %}
+      <tr><td>{{ item.laptop_name }} × {{ item.quantity }}</td><td>${{ item.subtotal }}</td></tr>
+      {% endfor %}
+      <tr><td><b>Total</b></td><td><b>${{ order.total }}</b></td></tr>
+    </table>
+    <a href="{% url 'store:product_list' %}" class="btn btn-primary">Continue shopping</a>
+  </div>
+</div>
+{% endblock %}

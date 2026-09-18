@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Wishlist — NOTEBIT{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1 style="padding-top:36px;margin-bottom:24px">Your wishlist</h1>
+  {% if items %}
+  <div class="product-grid">
+    {% for item in items %}
+      {% with laptop=item.laptop %}{% include 'store/_product_card.html' %}{% endwith %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state"><span class="glyph">♡</span><p>Nothing saved yet — tap the heart on any laptop to add it here.</p></div>
+  {% endif %}
+</div>
+{% endblock %}
